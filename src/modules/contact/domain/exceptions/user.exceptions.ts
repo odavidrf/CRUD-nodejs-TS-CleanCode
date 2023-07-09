@@ -50,3 +50,14 @@ export class UserPhoneRequieredExecptions extends DomainException {
 		return 'phone is required'
 	}
 }
+
+export class UserNotFoundExceptions extends DomainException{
+	constructor() {
+		super(UserNotFoundExceptions.getMessage())
+		this.name = DomainExceptionCode.USER_NOT_FOUND
+	}
+	static getMessage() {
+		return 'User not found'
+}
+
+}

@@ -1,8 +1,11 @@
-import Contact,{ContactProperties} from './contact'
+import Contact from './contact';
+import { ContactUpdate } from './domain_interfaces/entity.update'
+import {Result} from 'neverthrow'
+import { UserNotFoundExceptions } from './exceptions/user.exceptions'
 
 export interface ContactRepository {
-	list():ContactProperties[]
-	insert(contact: Contact): Contact
-	update(contact: Contact): Contact
-	delete(email: string): Contact
+	insert(contact: Contact): Promise<Contact>
+	list(): Promise<Contact[]>
+	update(email: string, contact: Partial<ContactUpdate>): Promise<Result<Contact, UserNotFoundExceptions>>
+	delete(email: string): Promise<Result<Contact, UserNotFoundExceptions>>
 }

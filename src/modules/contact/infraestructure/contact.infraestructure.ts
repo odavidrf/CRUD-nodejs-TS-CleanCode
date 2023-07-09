@@ -2,21 +2,21 @@ import Contact from '../domain/contact'
 import { ContactRepository } from '../domain/contact.repository'
 import { contactEntity } from './contact.entityes'
 import databaseBootstrap from '../../../bootstrap/database.bootstrap'
-import { EmailVO } from '../domain/email-value-objets/email.vo'
-
-
+import { EmailVO} from '../domain/email-value-objets/email.vo'
+import { UserEmailInvalidExecptions, UserNotFoundExceptions } from '../domain/exceptions/user.exceptions'
+import { Result, err, ok } from 'neverthrow'
+import { ContactUpdate } from '../domain/domain_interfaces/entity.update'
 
 export default class contactInfraestructure implements ContactRepository {
-	insert(contact: Contact): Contact {
-
-		const contactInsert = new contactEntity
-		const {email, lastname, name, phone, active}=contact.properties()
-		Object.assign(contactInsert,{
+	async insert(contact: Contact): Promise<Contact> {
+		const contactInsert = new contactEntity()
+		const { email, lastname, name, phone, active } = contact.properties()
+		Object.assign(contactInsert, {
 			name,
 			lastname,
-			email:email.value,
+			email: email.value,
 			phone,
-			active
+			active,
 		})
 
 		await databaseBootstrap.dataSource.getRepository(contactEntity).save(contactInsert)
@@ -24,35 +24,76 @@ export default class contactInfraestructure implements ContactRepository {
 	}
 
 	async list(): Promise<Contact[]> {
-
+		console.log(contactEntity)
 		const repo = databaseBootstrap.dataSource.getRepository(contactEntity)
-
-		const result = await repo.find({ where:{active:true} })
-
-		return result.map((el:contactEntity)=>{
-
+		const result = await repo.find({ where: { active: true } })
+		return result.map((el: contactEntity) => {
 			const emailResult = EmailVO.create(el.email)
-
-			//especificacion de email
-
-			return new contactEntity({
-				name:el.name,
-				lastname:el.lastname,
-				email:emailResult.value,
-				phone:el.phone,
-				active:el.active,
+			if (emailResult.isErr()) {
+				throw new UserEmailInvalidExecptions()
+			}
+			return new Contact({
+				name: el.name,
+				lastname: el.lastname,
+				email: emailResult.value,
+				phone: el.phone,
+				active: el.active,
 			})
-
 		})
 	}
-}
 
-   update(contact: Contact): Contact {
-		throw new Error('Method not implemented.')
+	async update(email: string, contact: Partial<ContactUpdate>): Promise<Result<Contact, UserNotFoundExceptions>> {
+		const repo = databaseBootstrap.dataSource.getRepository(contactEntity)
+		const userFound = await repo.findOne({
+			where: { email },
+		})
+		if (userFound) {
+			Object.assign(userFound, contact)
+			const contactEntity = await repo.save(userFound)
+			const EmailResult = EmailVO.create(contactEntity.email)
+
+			if (EmailResult.isErr()) {
+				return err(new UserEmailInvalidExecptions())
+			}
+
+			return ok(
+				new Contact({
+					name: contactEntity.name,
+					lastname: contactEntity.lastname,
+					phone: contactEntity.phone,
+					email: EmailResult.value,
+					active: contactEntity.active,
+				}),
+			)
+		} else {
+			return err(new UserNotFoundExceptions())
+		}
 	}
 
-	delete(email: string): Contact {
-		throw new Error('Method not implemented.')
-	}
+	async delete(email: string): Promise<Result<Contact, UserNotFoundExceptions>> {
+		const repo = databaseBootstrap.dataSource.getRepository(contactEntity)
+		const userFound = await repo.findOne({
+			where: { email },
+		})
+		if (userFound) {
+			userFound.active = false
+			const contactEntity = await repo.save(userFound)
+			const emailResult = EmailVO.create(contactEntity.email)
 
+			if (emailResult.isErr()) {
+				return err(new UserEmailInvalidExecptions())
+			}
+			return ok(
+				new Contact({
+					name: contactEntity.name,
+					lastname: contactEntity.lastname,
+					phone: contactEntity.phone,
+					email: emailResult.value,
+					active: contactEntity.active, 
+				}),
+			)
+		} else {
+			return err(new UserNotFoundExceptions())
+		}
+	}
 }

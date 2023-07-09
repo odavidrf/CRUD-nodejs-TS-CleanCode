@@ -1,20 +1,24 @@
 import ValueObject from './vo.class'
+import {UserEmailInvalidExecptions} from '../exceptions/user.exceptions'
+import { err, ok, Result} from 'neverthrow'
 
 interface EmailProps {
 	value: string
 }
+
+export type EmailResult = Result<EmailVO, UserEmailInvalidExecptions>
 
 export class EmailVO extends ValueObject<EmailProps> {
 	private constructor(props: EmailProps) {
 		super(props)
 	}
 
-	static create(email: string) {
+	static create(email: string):EmailResult {
 		if (!email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/gi)) {
-			throw new Error('It\'s not a valid mail addres')
+			return err(new UserEmailInvalidExecptions())
 		}
 
-		return new EmailVO({ value: email })
+		return ok(new EmailVO({value:email}))
 	}
 	get value(): string {
 		return this.props.value
