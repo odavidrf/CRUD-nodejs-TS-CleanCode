@@ -9,6 +9,9 @@ interface EmailProps {
 export type EmailResult = Result<EmailVO, UserEmailInvalidExecptions>
 
 export class EmailVO extends ValueObject<EmailProps> {
+	trim() {
+		throw new Error('Method not implemented.')
+	}
 	private constructor(props: EmailProps) {
 		super(props)
 	}

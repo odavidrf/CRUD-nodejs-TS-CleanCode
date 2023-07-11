@@ -11,7 +11,7 @@ export default class ContactApplication {
 		}
 
 		list(){
-			this.contactRepository.list()
+			return this.contactRepository.list()
 		}
 
 		update(email:string,contact:Partial<ContactUpdate>){
