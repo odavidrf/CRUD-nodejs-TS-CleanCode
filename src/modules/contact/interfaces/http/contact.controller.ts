@@ -10,7 +10,10 @@ import { ContactDeleteMapping } from './dto/contact-delete.dto'
 
 export default class {
 	constructor(private readonly application: ContactApplication) {
-		//
+		this.insert = this.insert.bind(this)
+		this.update = this.update.bind(this)
+		this.delete = this.delete.bind(this)
+		this.list = this.list.bind(this)
 	}
 
 	async insert(req: Request, res: Response, next: NextFunction) {

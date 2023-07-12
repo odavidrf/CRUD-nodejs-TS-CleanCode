@@ -1,6 +1,7 @@
 import express, { Application } from 'express'
 import RouterHealt from './helpers/health'
 import handlerErrors from './helpers/errors'
+import routerContact from './modules/contact/interfaces/http/contact.routes'
 
 class App {
 	readonly expressApp: Application
@@ -9,6 +10,7 @@ class App {
 		this.expressApp = express()
 		this.mountHealthCheck()
 		this.mountMiddlewares()
+		this.mountRoutes()
 		this.mountError()
 	}
 
@@ -19,6 +21,10 @@ class App {
 	mountMiddlewares() {
 		this.expressApp.use(express.json())
 		this.expressApp.use(express.urlencoded({ extended: true }))
+	}
+
+	mountRoutes (): void {
+		this.expressApp.use('/contact', routerContact)
 	}
 
 	mountError(): void {

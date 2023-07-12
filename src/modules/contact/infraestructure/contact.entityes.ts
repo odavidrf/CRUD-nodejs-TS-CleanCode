@@ -1,9 +1,9 @@
-import { Entity, Column } from 'typeorm'
+import { Entity, Column, PrimaryColumn } from 'typeorm'
 
 @Entity()
 export class contactEntity {
 
-	@Column({type: 'varchar', length:100})
+	@PrimaryColumn({type: 'varchar', length:100})
 	name: string
 
 	@Column({type: 'varchar', length:100})

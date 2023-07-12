@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm'
 import { Bootstrap } from './base.bootstrap'
+import { contactEntity } from '../modules/contact/infraestructure/contact.entityes'
 
 let appDataSource: DataSource
 
@@ -14,7 +15,7 @@ export default class extends Bootstrap {
 			database: 'bddcursonode',
 			synchronize: true,
 			logging: true,
-			entities: [],
+			entities: [contactEntity],
 			migrations: [],
 			subscribers: [],
 		})
